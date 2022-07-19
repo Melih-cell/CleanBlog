@@ -12,6 +12,13 @@ app.use(express.json());
 
 app.set('view engine', 'ejs');
 
+app.get('/photos/:id', async (req, res) => {
+  const post = await Photo.findById(req.params.id);
+  res.render('post', {
+    post,
+  });
+});
+
 app.get('/', async (req, res) => {
   const photos = await Photo.find({});
   res.render('index', {
