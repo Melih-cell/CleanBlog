@@ -3,48 +3,36 @@ const app = express();
 const ejs = require('ejs');
 const Photo = require('./models/Photo');
 const mongoose = require('mongoose');
+const methodOverride = require('method-override');
+const textControllers = require('./controllers/textControllers');
+const pageControllers = require('./controllers/pageControllers');
 
+// ! Mongoose connect
 mongoose.connect('mongodb://127.0.0.1:27017/melihdokuzlar');
 app.use(express.static('public'));
-//MiddleWare isteği sonlandır
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
 app.set('view engine', 'ejs');
 
-app.get('/photos/:id', async (req, res) => {
-  const post = await Photo.findById(req.params.id);
-  res.render('post', {
-    post,
-  });
-});
+// * MiddleWare
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride('_method'));
 
-app.get('/', async (req, res) => {
-  const photos = await Photo.find({});
-  res.render('index', {
-    photos,
-  });
-});
+// * Routes
+app.get('/', textControllers.getAllPhotos);
+app.get('/photos/:id', textControllers.getPost);
+app.put('/photos/:id', textControllers.updateText);
+app.delete('/photos/:id', textControllers.deleteText);
+app.post('/photos', textControllers.createText);
+app.get('/photos/edit/:id', textControllers.editText);
 
-app.get('/about', (req, res) => {
-  res.render('about');
-});
+// * Pages
+app.get('/about', pageControllers.getAboutPage);
+app.get('/add_post', pageControllers.getAddPage);
+app.get('/post', pageControllers.getPostPage);
 
-app.get('/add_post', (req, res) => {
-  res.render('add_post');
-});
-
-app.get('/post', (req, res) => {
-  res.render('post');
-});
-
-app.post('/photos', async (req, res) => {
-  await Photo.create(req.body);
-  res.redirect('/');
-});
-
+// ! Port
 const port = 3000;
-
 app.listen(port, () => {
   console.log(`Server is create port : ${port} `);
 });
